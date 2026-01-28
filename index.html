@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>game-client</title>
+</head>
+
+<body>
+  <div id="app">
+    <h1>🕹️ Game Server Test</h1>
+
+    <div id="connection-status">
+      Status: <span id="status-text" style="color: red;">Disconnected 🔴</span>
+    </div>
+
+    <hr />
+
+    <div id="chat-window"
+      style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+    </div>
+
+    <input type="text" id="message-input" placeholder="Type a message..." />
+    <button id="send-btn">Send</button>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
