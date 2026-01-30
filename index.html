@@ -18,12 +18,23 @@
 
     <hr />
 
-    <div id="chat-window"
-      style="height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+    <div id="client-info" style="margin-bottom: 20px;">
+      <h2>Client Info</h2>
+      <p>Client ID: <strong id="client-id-display">Waiting for WELCOME...</strong></p>
     </div>
 
-    <input type="text" id="message-input" placeholder="Type a message..." />
-    <button id="send-btn">Send</button>
+    <div id="world-state" style="margin-bottom: 20px;">
+      <h2>World State</h2>
+      <pre id="world-state-display"
+        style="border: 1px solid #ccc; padding: 10px; overflow-x: auto; background: #cda2a2; border-radius: 4px;">
+Waiting for WELCOME...</pre>
+    </div>
+
+    <div style="margin-top: 20px;">
+      <h2>Send Message</h2>
+      <input type="text" id="message-input" placeholder="Type a message..." />
+      <button id="send-btn">Send</button>
+    </div>
   </div>
 
   <script type="module" src="/src/main.ts"></script>
