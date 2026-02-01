@@ -36,10 +36,44 @@ h1 {
 }
 
 #app {
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+#game-container {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+#world-state {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+#world-state-display {
+  border: 1px solid #ccc;
+  padding: 10px;
+  overflow-x: auto;
+  background: #1a1a1a;
+  border-radius: 4px;
+  max-height: 500px;
+  overflow-y: auto;
+  text-align: left;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+#world-state-display code {
+  color: #a9b7c6;
+}
+
+#canvas {
+  flex-shrink: 0;
 }
 
 .logo {

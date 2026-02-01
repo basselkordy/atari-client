@@ -10,7 +10,7 @@
 
 <body>
   <div id="app">
-    <h1>🕹️ Game Server Test</h1>
+    <h1>🕹️ Game Client</h1>
 
     <div id="connection-status">
       Status: <span id="status-text" style="color: red;">Disconnected 🔴</span>
@@ -23,18 +23,15 @@
       <p>Client ID: <strong id="client-id-display">Waiting for WELCOME...</strong></p>
     </div>
 
-    <div id="world-state" style="margin-bottom: 20px;">
-      <h2>World State</h2>
-      <pre id="world-state-display"
-        style="border: 1px solid #ccc; padding: 10px; overflow-x: auto; background: #cda2a2; border-radius: 4px;">
-Waiting for WELCOME...</pre>
+    <div id="game-container" style="display: flex; gap: 20px; align-items: flex-start;">
+      <canvas id="canvas" width="500" height="500" style="border: 1px solid red; flex-shrink: 0;"></canvas>
+
+      <div id="world-state" style="flex: 1; min-width: 0;">
+        <h2>World State</h2>
+        <pre id="world-state-display"><code class="language-json">Waiting for WELCOME...</code></pre>
+      </div>
     </div>
 
-    <div style="margin-top: 20px;">
-      <h2>Send Message</h2>
-      <input type="text" id="message-input" placeholder="Type a message..." />
-      <button id="send-btn">Send</button>
-    </div>
   </div>
 
   <script type="module" src="/src/main.ts"></script>
