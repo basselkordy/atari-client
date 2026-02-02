@@ -3,6 +3,7 @@ export enum MessageType {
   WELCOME = "WELCOME",
   SYNC = "SYNC",
   DISCONNECTED = "DISCONNECTED",
+  INTENT = "INTENT",
 }
 
 export interface Message<T = void> {
@@ -24,4 +25,10 @@ export interface WelcomePayload {
 
 export interface SyncPayload {
   worldState: Player[];
+}
+
+export interface IntentPayload {
+  id: string;
+  deltaX: number;
+  deltaY: number;
 }

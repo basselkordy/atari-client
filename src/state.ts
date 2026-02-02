@@ -1,6 +1,14 @@
 import type { InputManager } from "./input";
-import type { Message, WelcomePayload, SyncPayload, Player } from "./message";
+import type {
+  Message,
+  WelcomePayload,
+  SyncPayload,
+  Player,
+  IntentPayload,
+} from "./message";
 import { MessageType } from "./message";
+
+const MOVE_STEP = 1;
 
 export interface GameState {
   clientId: string;
@@ -28,6 +36,7 @@ export class StateManager {
     };
     this.inputManager = inputManager;
     this.startInboundPolling(100);
+    this.startOutboundPolling(1);
   }
 
   private startInboundPolling(pollIntervalMs: number) {
@@ -39,7 +48,46 @@ export class StateManager {
     }, pollIntervalMs);
   }
 
-  private startOutboundPolling(pollIntervalMs: number) {}
+  private startOutboundPolling(pollIntervalMs: number) {
+    setInterval(() => {
+      this.processInput();
+    }, pollIntervalMs);
+  }
+
+  private processInput() {
+    const player = this.gameState.worldState.find(
+      (p) => p.id === this.gameState.clientId,
+    );
+    if (!player) return;
+
+    let deltaX = 0;
+    let deltaY = 0;
+
+    if (this.inputManager.isPressed("RIGHT")) {
+      deltaX += MOVE_STEP;
+    }
+    if (this.inputManager.isPressed("LEFT")) {
+      deltaX -= MOVE_STEP;
+    }
+    if (this.inputManager.isPressed("UP")) {
+      deltaY -= MOVE_STEP;
+    }
+    if (this.inputManager.isPressed("DOWN")) {
+      deltaY += MOVE_STEP;
+    }
+
+    if (deltaX !== 0 || deltaY !== 0) {
+      const intentMessage: Message<IntentPayload> = {
+        type: MessageType.INTENT,
+        payload: {
+          id: this.gameState.clientId,
+          deltaX: deltaX,
+          deltaY: deltaY,
+        },
+      };
+      this.outboundBuffer.push(intentMessage);
+    }
+  }
 
   public getGameState(): GameState {
     return this.gameState;
