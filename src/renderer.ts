@@ -8,7 +8,7 @@ export class Renderer {
   private clientIdDisplay: HTMLElement;
   private worldStateDisplay: HTMLElement;
 
-  constructor(stateManager: StateManager) {
+  constructor(stateManager: StateManager, frameRate: number) {
     this.stateManager = stateManager;
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
     this.ctx = this.canvas.getContext("2d")!;
@@ -16,14 +16,14 @@ export class Renderer {
     this.clientIdDisplay = document.getElementById("client-id-display")!;
     this.worldStateDisplay = document.getElementById("world-state-display")!;
 
-    this.startRendering();
+    this.startRendering(frameRate);
   }
 
-  private startRendering() {
+  private startRendering(frameRate: number) {
     setInterval(() => {
       this.renderGame();
       this.renderUI();
-    }, 16); // ~60fps
+    }, frameRate); // ~60fps
   }
 
   private renderGame() {

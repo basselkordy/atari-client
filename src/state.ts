@@ -8,7 +8,7 @@ import type {
 } from "./message";
 import { MessageType } from "./message";
 
-const MOVE_STEP = 1;
+const MOVE_STEP = 4;
 
 export interface GameState {
   clientId: string;
@@ -26,6 +26,8 @@ export class StateManager {
     inboundBuffer: Message<unknown>[],
     outboundBuffer: Message<unknown>[],
     inputManager: InputManager,
+    networkReceiveRate: number,
+    inputSamplingRate: number
   ) {
     this.inboundBuffer = inboundBuffer;
     this.outboundBuffer = outboundBuffer;
@@ -35,23 +37,23 @@ export class StateManager {
       isConnected: false,
     };
     this.inputManager = inputManager;
-    this.startInboundPolling(100);
-    this.startOutboundPolling(1);
+    this.startInboundPolling(networkReceiveRate);
+    this.startOutboundPolling(inputSamplingRate);
   }
 
-  private startInboundPolling(pollIntervalMs: number) {
+  private startInboundPolling(networkReceiveRate: number) {
     setInterval(() => {
       while (this.inboundBuffer.length > 0) {
         const message = this.inboundBuffer.shift()!;
         this.handleMessage(message);
       }
-    }, pollIntervalMs);
+    }, networkReceiveRate);
   }
 
-  private startOutboundPolling(pollIntervalMs: number) {
+  private startOutboundPolling(inputSamplingRate: number) {
     setInterval(() => {
       this.processInput();
-    }, pollIntervalMs);
+    }, inputSamplingRate);
   }
 
   private processInput() {

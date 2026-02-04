@@ -9,13 +9,13 @@ export class NetworkManager {
     wsUrl: string,
     inboundBuffer: Message<unknown>[],
     outboundBuffer: Message<unknown>[],
-    pollIntervalMs: number = 100,
+    networkSendrate: number = 16, // 60 FPS (send updates every 16MS)
   ) {
     this.inboundBuffer = inboundBuffer;
     this.outboundBuffer = outboundBuffer;
     this.socket = new WebSocket(wsUrl);
     this.setupEventHandlers();
-    this.startOutboundPolling(pollIntervalMs);
+    this.startOutboundPolling(networkSendrate);
   }
 
   private setupEventHandlers() {
@@ -37,7 +37,7 @@ export class NetworkManager {
     };
   }
 
-  private startOutboundPolling(pollIntervalMs: number) {
+  private startOutboundPolling(networkSendrate: number) {
     setInterval(() => {
       if (this.outboundBuffer.length > 0 && this.socket.readyState === WebSocket.OPEN) {
         while (this.outboundBuffer.length > 0) {
@@ -47,6 +47,6 @@ export class NetworkManager {
           }
         }
       }
-    }, pollIntervalMs);
+    }, networkSendrate);
   }
 }
