@@ -7,10 +7,10 @@ import { InputManager } from "./input";
 const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3000";
 
 // Ticker rate constants (in milliseconds)
-const INPUT_SAMPLING_RATE = 16; // 60 Hz - how often to check keyboard state
-const NETWORK_SEND_RATE = 0; // Immediately send messages to server since the server is event driven. won't scale. but provides smooth movment for now
-const NETWORK_RECEIVE_RATE = 16; // 60 Hz - how often to process server messages
-const RENDER_RATE = 16; // 60 FPS - how often to render visuals
+const INPUT_SAMPLING_RATE = 1000 / 60; // how often to check keyboard state
+const NETWORK_SEND_RATE = 1000 / 60; // matches server tick rate (60 Hz)
+const NETWORK_RECEIVE_RATE = 1000 / 60; // how often to process server messages
+const RENDER_RATE = 1000 / 60; // 60 FPS - how often to render visuals
 
 const inboundBuffer: Message<unknown>[] = [];
 const outboundBuffer: Message<unknown>[] = [];

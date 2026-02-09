@@ -8,6 +8,13 @@ export class Renderer {
   private clientIdDisplay: HTMLElement;
   private worldStateDisplay: HTMLElement;
 
+  // Canvas dimensions
+  private readonly CANVAS_WIDTH = 500;
+  private readonly CANVAS_HEIGHT = 500;
+
+  // Debug flag - set to true to show canvas bounds
+  private readonly DEBUG_SHOW_BOUNDS = true;
+
   constructor(stateManager: StateManager, frameRate: number) {
     this.stateManager = stateManager;
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -15,6 +22,10 @@ export class Renderer {
     this.statusText = document.getElementById("status-text")!;
     this.clientIdDisplay = document.getElementById("client-id-display")!;
     this.worldStateDisplay = document.getElementById("world-state-display")!;
+
+    // Set canvas dimensions
+    this.canvas.width = this.CANVAS_WIDTH;
+    this.canvas.height = this.CANVAS_HEIGHT;
 
     this.startRendering(frameRate);
   }
@@ -33,15 +44,64 @@ export class Renderer {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     state.worldState.forEach((player) => {
-      this.ctx.fillStyle = player.color;
-      this.ctx.fillRect(player.x, player.y, SIDE, SIDE);
+      // Convert from body-center (server) to top-left (canvas)
+      const topLeftX = player.x - SIDE / 2;
+      const topLeftY = player.y - SIDE / 2;
 
-      // Draw player ID below the rectangle
+      this.ctx.fillStyle = player.color;
+      this.ctx.fillRect(topLeftX, topLeftY, SIDE, SIDE);
+
+      // Draw player ID below the rectangle (using center position)
       this.ctx.fillStyle = "#000000";
       this.ctx.font = "12px sans-serif";
       this.ctx.textAlign = "center";
-      this.ctx.fillText(player.id, player.x + SIDE / 2, player.y + SIDE + 14);
+      this.ctx.fillText(player.id, player.x, topLeftY + SIDE + 14);
     });
+
+    // Debug: Draw canvas bounds indicators
+    if (this.DEBUG_SHOW_BOUNDS) {
+      this.drawBoundsIndicators();
+    }
+  }
+
+  private drawBoundsIndicators() {
+    const lineLength = 20;
+    const lineWidth = 2;
+
+    this.ctx.strokeStyle = "#00ff00";
+    this.ctx.lineWidth = lineWidth;
+
+    // Top-left corner
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, 0);
+    this.ctx.lineTo(lineLength, 0);
+    this.ctx.moveTo(0, 0);
+    this.ctx.lineTo(0, lineLength);
+    this.ctx.stroke();
+
+    // Top-right corner
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.canvas.width, 0);
+    this.ctx.lineTo(this.canvas.width - lineLength, 0);
+    this.ctx.moveTo(this.canvas.width, 0);
+    this.ctx.lineTo(this.canvas.width, lineLength);
+    this.ctx.stroke();
+
+    // Bottom-left corner
+    this.ctx.beginPath();
+    this.ctx.moveTo(0, this.canvas.height);
+    this.ctx.lineTo(lineLength, this.canvas.height);
+    this.ctx.moveTo(0, this.canvas.height);
+    this.ctx.lineTo(0, this.canvas.height - lineLength);
+    this.ctx.stroke();
+
+    // Bottom-right corner
+    this.ctx.beginPath();
+    this.ctx.moveTo(this.canvas.width, this.canvas.height);
+    this.ctx.lineTo(this.canvas.width - lineLength, this.canvas.height);
+    this.ctx.moveTo(this.canvas.width, this.canvas.height);
+    this.ctx.lineTo(this.canvas.width, this.canvas.height - lineLength);
+    this.ctx.stroke();
   }
 
   private renderUI() {
