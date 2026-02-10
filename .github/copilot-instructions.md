@@ -1,0 +1,1 @@
+- Layout: `#app` contains a compact `#top-panel`, and `#main-area` with a centered canvas plus a right-side scrollable `#world-state` panel.

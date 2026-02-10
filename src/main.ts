@@ -1,3 +1,4 @@
+import "./style.css";
 import { NetworkManager } from "./network";
 import { Renderer } from "./renderer";
 import type { Message } from "./message";

@@ -9,8 +9,8 @@ export class Renderer {
   private worldStateDisplay: HTMLElement;
 
   // Canvas dimensions
-  private readonly CANVAS_WIDTH = 500;
-  private readonly CANVAS_HEIGHT = 500;
+  private readonly CANVAS_WIDTH = 800;
+  private readonly CANVAS_HEIGHT = 600;
 
   // Debug flag - set to true to show canvas bounds
   private readonly DEBUG_SHOW_BOUNDS = true;
@@ -52,7 +52,7 @@ export class Renderer {
       this.ctx.fillRect(topLeftX, topLeftY, SIDE, SIDE);
 
       // Draw player ID below the rectangle (using center position)
-      this.ctx.fillStyle = "#000000";
+      this.ctx.fillStyle = "#ffffff";
       this.ctx.font = "12px sans-serif";
       this.ctx.textAlign = "center";
       this.ctx.fillText(player.id, player.x, topLeftY + SIDE + 14);
