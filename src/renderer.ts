@@ -1,3 +1,4 @@
+import { RenderHelpers } from "./render-helpers";
 import { StateManager } from "./state";
 
 export class Renderer {
@@ -8,7 +9,7 @@ export class Renderer {
   private clientIdDisplay: HTMLElement;
   private worldStateDisplay: HTMLElement;
 
-  // Canvas dimensions
+  // Canvas dimensions - maybe get those from server in the future?
   private readonly CANVAS_WIDTH = 800;
   private readonly CANVAS_HEIGHT = 600;
 
@@ -39,14 +40,27 @@ export class Renderer {
 
   private renderGame() {
     const state = this.stateManager.getGameState();
-    const SIDE = 50;
-
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
+    this.renderStaticBodies(state);
+    this.renderPlayers(state);
+
+    // Debug: Draw canvas bounds indicators
+    if (this.DEBUG_SHOW_BOUNDS) {
+      this.drawBoundsIndicators();
+    }
+  }
+
+  private renderPlayers(state: ReturnType<StateManager["getGameState"]>) {
+    const SIDE = 50;
+
     state.worldState.forEach((player) => {
-      // Convert from body-center (server) to top-left (canvas)
-      const topLeftX = player.x - SIDE / 2;
-      const topLeftY = player.y - SIDE / 2;
+      const { x: topLeftX, y: topLeftY } = RenderHelpers.centerToTopLeft(
+        player.x,
+        player.y,
+        SIDE,
+        SIDE,
+      );
 
       this.ctx.fillStyle = player.color;
       this.ctx.fillRect(topLeftX, topLeftY, SIDE, SIDE);
@@ -57,11 +71,62 @@ export class Renderer {
       this.ctx.textAlign = "center";
       this.ctx.fillText(player.id, player.x, topLeftY + SIDE + 14);
     });
+  }
 
-    // Debug: Draw canvas bounds indicators
-    if (this.DEBUG_SHOW_BOUNDS) {
-      this.drawBoundsIndicators();
+  private renderStaticBodies(state: ReturnType<StateManager["getGameState"]>) {
+    if (!state.map) {
+      return;
     }
+
+    const labelYOffset = 4;
+    const drawBody = (
+      id: string,
+      centerX: number,
+      centerY: number,
+      width: number,
+      height: number,
+      fill: string,
+      textColor: string,
+    ) => {
+      const { x: topLeftX, y: topLeftY } = RenderHelpers.centerToTopLeft(
+        centerX,
+        centerY,
+        width,
+        height,
+      );
+
+      this.ctx.fillStyle = fill;
+      this.ctx.fillRect(topLeftX, topLeftY, width, height);
+
+      this.ctx.fillStyle = textColor;
+      this.ctx.font = "12px sans-serif";
+      this.ctx.textAlign = "center";
+      this.ctx.fillText(id, centerX, centerY + labelYOffset);
+    };
+
+    state.map.walls.forEach((wall) => {
+      drawBody(
+        wall.id,
+        wall.x,
+        wall.y,
+        wall.width,
+        wall.height,
+        "#444444",
+        "#ffffff",
+      );
+    });
+
+    state.map.platforms.forEach((platform) => {
+      drawBody(
+        platform.id,
+        platform.x,
+        platform.y,
+        platform.width,
+        platform.height,
+        "#6c7bff",
+        "#ffffff",
+      );
+    });
   }
 
   private drawBoundsIndicators() {

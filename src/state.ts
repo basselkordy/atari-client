@@ -1,9 +1,16 @@
-import type { Message, WelcomePayload, SyncPayload, Player } from "./message";
+import type {
+  Message,
+  WelcomePayload,
+  SyncPayload,
+  Player,
+  GameMap,
+} from "./message";
 import { MessageType } from "./message";
 
 export interface GameState {
   clientId: string;
   worldState: Player[];
+  map: GameMap | null;
   isConnected: boolean;
 }
 
@@ -17,6 +24,7 @@ export class StateManager {
     this.gameState = {
       clientId: "",
       worldState: [],
+      map: null,
       isConnected: false,
     };
     this.startInboundPolling(networkReceiveRate);
@@ -42,12 +50,14 @@ export class StateManager {
   private handleWelcome(payload: WelcomePayload): void {
     this.gameState.clientId = payload.id;
     this.gameState.worldState = payload.worldState;
+    this.gameState.map = payload.map;
     this.onWelcomeCallback(payload.id);
     console.log("WELCOME received:", this.gameState);
   }
 
   private handleSync(payload: SyncPayload): void {
     this.gameState.worldState = payload.worldState;
+    this.gameState.map = payload.map;
   }
 
   private handleMessage(message: Message<unknown>): void {
