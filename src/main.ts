@@ -3,7 +3,8 @@ import { NetworkManager } from "./network";
 import { Renderer } from "./renderer";
 import type { Message } from "./message";
 import { StateManager } from "./state";
-import { InputManager } from "./input";
+import { Keyboard } from "./keyboard";
+import { IntentManager } from "./input";
 
 const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3000";
 
@@ -22,13 +23,21 @@ const network = new NetworkManager(
   outboundBuffer,
   NETWORK_SEND_RATE,
 );
-const input = new InputManager();
-const stateManager = new StateManager(
-  inboundBuffer,
+const keyboard = new Keyboard();
+
+const intentManager = new IntentManager(
   outboundBuffer,
-  input,
-  NETWORK_RECEIVE_RATE,
+  keyboard,
   INPUT_SAMPLING_RATE,
 );
+
+const stateManager = new StateManager(inboundBuffer, NETWORK_RECEIVE_RATE);
+
+// Link the welcome callback to pass client ID from state manager to intent manager
+// this allows the intent manager to stay decoupled from the state manager's internal workings
+stateManager.setOnWelcomeCallback(
+  (clientId: string) => intentManager.onWelcome(clientId),
+)
+
 
 const renderer = new Renderer(stateManager, RENDER_RATE);

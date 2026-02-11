@@ -1,1 +1,2 @@
 - Layout: `#app` contains a compact `#top-panel`, and `#main-area` with a centered canvas plus a right-side scrollable `#world-state` panel.
+- Intent: input sampling + intent creation lives in `IntentManager` (src/input.ts), while `StateManager` only handles inbound state.

@@ -1,14 +1,5 @@
-import type { InputManager } from "./input";
-import type {
-  Message,
-  WelcomePayload,
-  SyncPayload,
-  Player,
-  IntentPayload,
-} from "./message";
+import type { Message, WelcomePayload, SyncPayload, Player } from "./message";
 import { MessageType } from "./message";
-
-const MOVE_STEP = 4;
 
 export interface GameState {
   clientId: string;
@@ -18,27 +9,17 @@ export interface GameState {
 
 export class StateManager {
   private inboundBuffer: Message<unknown>[];
-  private outboundBuffer: Message<unknown>[];
   private gameState: GameState;
-  private inputManager: InputManager;
+  private onWelcomeCallback: (clientId: string) => void = function () {};
 
-  constructor(
-    inboundBuffer: Message<unknown>[],
-    outboundBuffer: Message<unknown>[],
-    inputManager: InputManager,
-    networkReceiveRate: number,
-    inputSamplingRate: number
-  ) {
+  constructor(inboundBuffer: Message<unknown>[], networkReceiveRate: number) {
     this.inboundBuffer = inboundBuffer;
-    this.outboundBuffer = outboundBuffer;
     this.gameState = {
       clientId: "",
       worldState: [],
       isConnected: false,
     };
-    this.inputManager = inputManager;
     this.startInboundPolling(networkReceiveRate);
-    this.startOutboundPolling(inputSamplingRate);
   }
 
   private startInboundPolling(networkReceiveRate: number) {
@@ -50,65 +31,26 @@ export class StateManager {
     }, networkReceiveRate);
   }
 
-  private startOutboundPolling(inputSamplingRate: number) {
-    setInterval(() => {
-      this.processInput();
-    }, inputSamplingRate);
-  }
-
-  private processInput() {
-    const player = this.gameState.worldState.find(
-      (p) => p.id === this.gameState.clientId,
-    );
-    if (!player) return;
-
-    let deltaX = 0;
-    let deltaY = 0;
-
-    if (this.inputManager.isPressed("RIGHT")) {
-      deltaX += MOVE_STEP;
-    }
-    if (this.inputManager.isPressed("LEFT")) {
-      deltaX -= MOVE_STEP;
-    }
-    if (this.inputManager.isPressed("UP")) {
-      deltaY -= MOVE_STEP;
-    }
-    if (this.inputManager.isPressed("DOWN")) {
-      deltaY += MOVE_STEP;
-    }
-
-    if (deltaX !== 0 || deltaY !== 0) {
-      const intentMessage: Message<IntentPayload> = {
-        type: MessageType.INTENT,
-        payload: {
-          id: this.gameState.clientId,
-          deltaX: deltaX,
-          deltaY: deltaY,
-        },
-      };
-      this.outboundBuffer.push(intentMessage);
-    }
-  }
-
   public getGameState(): GameState {
     return this.gameState;
   }
 
+  public setOnWelcomeCallback(callback: (clientId: string) => void) {
+    this.onWelcomeCallback = callback;
+  }
+
   private handleWelcome(payload: WelcomePayload): void {
-    console.log(payload);
     this.gameState.clientId = payload.id;
     this.gameState.worldState = payload.worldState;
+    this.onWelcomeCallback(payload.id);
     console.log("WELCOME received:", this.gameState);
   }
 
   private handleSync(payload: SyncPayload): void {
     this.gameState.worldState = payload.worldState;
-    console.log("SYNC received:", this.gameState);
   }
 
   private handleMessage(message: Message<unknown>): void {
-    console.log(message);
     switch (message.type) {
       case MessageType.CONNECTED:
         this.gameState.isConnected = true;
