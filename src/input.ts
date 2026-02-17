@@ -2,12 +2,11 @@ import type { Keyboard } from "./keyboard";
 import type { IntentPayload, Message } from "./message";
 import { MessageType } from "./message";
 
-const MOVE_STEP = 4;
-
 export class IntentManager {
   private outboundBuffer: Message<unknown>[];
   private keyboard: Keyboard;
   private clientId: string = "";
+  private lastJumpPressed = false;
 
   constructor(
     outboundBuffer: Message<unknown>[],
@@ -29,39 +28,31 @@ export class IntentManager {
     this.clientId = clientId;
   }
 
-
   private processInput() {
-    const player = this.clientId
-    if (!player) {
-        console.warn("Client ID not set, cannot generate intent");
-        return;
-    }
-    let deltaX = 0;
-    let deltaY = 0;
-
-    if (this.keyboard.isPressed("RIGHT")) {
-      deltaX += MOVE_STEP;
-    }
-    if (this.keyboard.isPressed("LEFT")) {
-      deltaX -= MOVE_STEP;
-    }
-    if (this.keyboard.isPressed("UP")) {
-      deltaY -= MOVE_STEP;
-    }
-    if (this.keyboard.isPressed("DOWN")) {
-      deltaY += MOVE_STEP;
+    const playerId = this.clientId;
+    if (!playerId) {
+      console.warn("Client ID not set, cannot generate intent");
+      return;
     }
 
-    if (deltaX !== 0 || deltaY !== 0) {
-      const intentMessage: Message<IntentPayload> = {
-        type: MessageType.INTENT,
-        payload: {
-          id: this.clientId,
-          deltaX: deltaX,
-          deltaY: deltaY,
-        },
-      };
-      this.outboundBuffer.push(intentMessage);
-    }
+    const left = this.keyboard.isPressed("LEFT");
+    const right = this.keyboard.isPressed("RIGHT");
+    const down = this.keyboard.isPressed("DOWN");
+    const jumpPressed = this.keyboard.isPressed("UP");
+    const jump = jumpPressed && !this.lastJumpPressed;
+
+    this.lastJumpPressed = jumpPressed;
+
+    const intentMessage: Message<IntentPayload> = {
+      type: MessageType.INTENT,
+      payload: {
+        id: playerId,
+        left,
+        right,
+        down,
+        jump,
+      },
+    };
+    this.outboundBuffer.push(intentMessage);
   }
 }

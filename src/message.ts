@@ -52,6 +52,8 @@ export interface SyncPayload {
 
 export interface IntentPayload {
   id: string;
-  deltaX: number;
-  deltaY: number;
+  left: boolean;
+  right: boolean;
+  down: boolean;
+  jump: boolean;
 }

@@ -1,5 +1,6 @@
 - Layout: `#app` contains a compact `#top-panel`, and `#main-area` with a centered canvas plus a right-side scrollable `#world-state` panel.
 - Intent: input sampling + intent creation lives in `IntentManager` (src/input.ts), while `StateManager` only handles inbound state.
+- Intent payload: `INTENT` now sends booleans `{ id, left, right, down, jump }`; `jump` is edge-triggered on key press and is sampled each tick in `IntentManager`.
 - Rendering: `Renderer` draws static map bodies (walls/platforms) separately from players, using centered coordinates from state `map`.
 - State: inbound messages include `map` (walls/platforms) stored on game state and updated on WELCOME/SYNC.
 - Rendering helpers: `RenderHelpers.centerToTopLeft` converts centered coordinates to canvas top-left.
