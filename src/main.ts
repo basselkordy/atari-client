@@ -20,7 +20,7 @@ const RENDER_RATE = 1000 / 60; // 60 FPS - how often to render visuals
 const inboundBuffer: Message<unknown>[] = [];
 const outboundBuffer: Message<unknown>[] = [];
 
-const network = new NetworkManager(
+new NetworkManager(
   WS_URL,
   inboundBuffer,
   outboundBuffer,
@@ -42,11 +42,11 @@ stateManager.setOnWelcomeCallback((clientId: string) =>
   intentManager.onWelcome(clientId),
 );
 
-const renderer = new Renderer(stateManager, RENDER_RATE);
+new Renderer(stateManager, RENDER_RATE);
 
 // Initialize physics controls
 const physicsManager = new PhysicsManager(CONFIG_URL);
-const physicsUI = new PhysicsUI(
+new PhysicsUI(
   physicsManager,
   () => stateManager.getGameState().clientId,
 );
