@@ -5,8 +5,11 @@ import type { Message } from "./message";
 import { StateManager } from "./state";
 import { Keyboard } from "./keyboard";
 import { IntentManager } from "./input";
+import { PhysicsManager } from "./physics";
+import { PhysicsUI } from "./physics-ui";
 
 const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3000";
+const CONFIG_URL = import.meta.env.VITE_CONFIG_URL || "http://localhost:3001";
 
 // Ticker rate constants (in milliseconds)
 const INPUT_SAMPLING_RATE = 1000 / 60; // how often to check keyboard state
@@ -35,9 +38,15 @@ const stateManager = new StateManager(inboundBuffer, NETWORK_RECEIVE_RATE);
 
 // Link the welcome callback to pass client ID from state manager to intent manager
 // this allows the intent manager to stay decoupled from the state manager's internal workings
-stateManager.setOnWelcomeCallback(
-  (clientId: string) => intentManager.onWelcome(clientId),
-)
-
+stateManager.setOnWelcomeCallback((clientId: string) =>
+  intentManager.onWelcome(clientId),
+);
 
 const renderer = new Renderer(stateManager, RENDER_RATE);
+
+// Initialize physics controls
+const physicsManager = new PhysicsManager(CONFIG_URL);
+const physicsUI = new PhysicsUI(
+  physicsManager,
+  () => stateManager.getGameState().clientId,
+);
