@@ -8,8 +8,8 @@ import { IntentManager } from "./input";
 import { PhysicsManager } from "./physics";
 import { PhysicsUI } from "./physics-ui";
 
-const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3000";
-const CONFIG_URL = import.meta.env.VITE_CONFIG_URL || "http://localhost:3001";
+const WS_URL = import.meta.env.VITE_WS_URL;
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Ticker rate constants (in milliseconds)
 const INPUT_SAMPLING_RATE = 1000 / 60; // how often to check keyboard state
@@ -45,7 +45,7 @@ stateManager.setOnWelcomeCallback((clientId: string) =>
 new Renderer(stateManager, RENDER_RATE);
 
 // Initialize physics controls
-const physicsManager = new PhysicsManager(CONFIG_URL);
+const physicsManager = new PhysicsManager(API_URL);
 new PhysicsUI(
   physicsManager,
   () => stateManager.getGameState().clientId,
