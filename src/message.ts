@@ -4,6 +4,8 @@ export enum MessageType {
   SYNC = "SYNC",
   DISCONNECTED = "DISCONNECTED",
   INTENT = "INTENT",
+  PING = "PING",
+  PONG = "PONG",
 }
 
 export interface Message<T = void> {
@@ -48,6 +50,10 @@ export interface WelcomePayload {
 export interface SyncPayload {
   worldState: Player[];
   map: GameMap;
+  lastIntentSeq: number | null;
+  lastIntentSentAt: number | null;
+  physicsDurationMs: number;
+  broadcastDurationMs: number;
 }
 
 export interface IntentPayload {
@@ -56,4 +62,15 @@ export interface IntentPayload {
   right: boolean;
   down: boolean;
   jump: boolean;
+  seq: number;
+  sentAt: number;
+}
+
+export interface PingPayload {
+  clientTime: number;
+}
+
+export interface PongPayload {
+  clientTime: number;
+  serverTime: number;
 }

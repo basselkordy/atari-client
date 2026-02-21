@@ -7,6 +7,7 @@ export class IntentManager {
   private keyboard: Keyboard;
   private clientId: string = "";
   private lastJumpPressed = false;
+  private seq = 0;
 
   constructor(
     outboundBuffer: Message<unknown>[],
@@ -42,6 +43,7 @@ export class IntentManager {
     const jump = jumpPressed && !this.lastJumpPressed;
 
     this.lastJumpPressed = jumpPressed;
+    this.seq += 1;
 
     const intentMessage: Message<IntentPayload> = {
       type: MessageType.INTENT,
@@ -51,6 +53,8 @@ export class IntentManager {
         right,
         down,
         jump,
+        seq: this.seq,
+        sentAt: Date.now(),
       },
     };
     this.outboundBuffer.push(intentMessage);

@@ -1,8 +1,10 @@
 import { RenderHelpers } from "./render-helpers";
 import { StateManager } from "./state";
+import type { LatencyMonitor } from "./latency-monitor";
 
 export class Renderer {
   private stateManager: StateManager;
+  private latencyMonitor: LatencyMonitor;
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private statusText: HTMLElement;
@@ -16,8 +18,13 @@ export class Renderer {
   // Debug flag - set to true to show canvas bounds
   private readonly DEBUG_SHOW_BOUNDS = true;
 
-  constructor(stateManager: StateManager, frameRate: number) {
+  constructor(
+    stateManager: StateManager,
+    latencyMonitor: LatencyMonitor,
+    frameRate: number,
+  ) {
     this.stateManager = stateManager;
+    this.latencyMonitor = latencyMonitor;
     this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
     this.ctx = this.canvas.getContext("2d")!;
     this.statusText = document.getElementById("status-text")!;
@@ -49,6 +56,8 @@ export class Renderer {
     if (this.DEBUG_SHOW_BOUNDS) {
       this.drawBoundsIndicators();
     }
+
+    this.renderDiagnosticsHUD();
   }
 
   private renderPlayers(state: ReturnType<StateManager["getGameState"]>) {
@@ -190,5 +199,57 @@ export class Renderer {
       2,
     );
     this.clientIdDisplay.innerText = state.clientId || "N/A";
+  }
+
+  private renderDiagnosticsHUD(): void {
+    const d = this.latencyMonitor.getSnapshot();
+    if (!d.visible) return;
+
+    const fmt = (v: number | null, suffix = "ms") =>
+      v !== null ? `${v}${suffix}` : "--";
+
+    const lines: Array<{ text: string; accent?: boolean }> = [
+      { text: "Network Diagnostics  [Tab to hide]", accent: true },
+      {
+        text: `Ping RTT:    ${fmt(d.pingRttMs)}${d.pingRttAvgMs !== null ? `  (avg ${d.pingRttAvgMs}ms)` : ""}`,
+      },
+      { text: `Intent RTT:  ${fmt(d.intentRttMs)}` },
+      {
+        text: `Physics:     ${d.physicsDurationMs !== null ? d.physicsDurationMs.toFixed(2) + "ms" : "--"}${d.physicsMaxMs !== null ? `  (max ${d.physicsMaxMs.toFixed(2)}ms)` : ""}`,
+      },
+      {
+        text: `Broadcast:   ${d.broadcastDurationMs !== null ? d.broadcastDurationMs.toFixed(2) + "ms" : "--"}`,
+      },
+      {
+        text: `SYNC size:   ${fmt(d.syncBytesPerFrame, " B/frame")}${d.syncBytesPerSecond !== null ? `  (~${d.syncBytesPerSecond} B/s)` : ""}`,
+      },
+      { text: "(server clock not synced to client)" },
+    ];
+
+    const padding = 10;
+    const lineHeight = 18;
+    const fontPx = 13;
+    const panelWidth = 330;
+    const panelHeight = lines.length * lineHeight + padding * 2;
+    const panelX = this.CANVAS_WIDTH - panelWidth - 10;
+    const panelY = 10;
+
+    // Background
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.78)";
+    this.ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
+
+    // Border
+    this.ctx.strokeStyle = "rgba(0, 255, 180, 0.5)";
+    this.ctx.lineWidth = 1;
+    this.ctx.strokeRect(panelX, panelY, panelWidth, panelHeight);
+
+    this.ctx.font = `${fontPx}px monospace`;
+    this.ctx.textAlign = "left";
+
+    lines.forEach((line, i) => {
+      const y = panelY + padding + (i + 1) * lineHeight - 4;
+      this.ctx.fillStyle = line.accent ? "#00ffb4" : "#e0e0e0";
+      this.ctx.fillText(line.text, panelX + padding, y);
+    });
   }
 }

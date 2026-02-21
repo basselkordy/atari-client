@@ -6,6 +6,7 @@ import type {
   GameMap,
 } from "./message";
 import { MessageType } from "./message";
+import type { LatencyMonitor } from "./latency-monitor";
 
 export interface GameState {
   clientId: string;
@@ -18,9 +19,15 @@ export class StateManager {
   private inboundBuffer: Message<unknown>[];
   private gameState: GameState;
   private onWelcomeCallback: (clientId: string) => void = function () {};
+  private latencyMonitor: LatencyMonitor;
 
-  constructor(inboundBuffer: Message<unknown>[], networkReceiveRate: number) {
+  constructor(
+    inboundBuffer: Message<unknown>[],
+    networkReceiveRate: number,
+    latencyMonitor: LatencyMonitor,
+  ) {
     this.inboundBuffer = inboundBuffer;
+    this.latencyMonitor = latencyMonitor;
     this.gameState = {
       clientId: "",
       worldState: [],
@@ -55,9 +62,15 @@ export class StateManager {
     console.log("WELCOME received:", this.gameState);
   }
 
-  private handleSync(payload: SyncPayload): void {
+  private handleSync(payload: SyncPayload, rawBytes: number): void {
     this.gameState.worldState = payload.worldState;
     this.gameState.map = payload.map;
+    this.latencyMonitor.recordSync(
+      rawBytes,
+      payload.lastIntentSentAt,
+      payload.physicsDurationMs,
+      payload.broadcastDurationMs,
+    );
   }
 
   private handleMessage(message: Message<unknown>): void {
@@ -74,7 +87,10 @@ export class StateManager {
         this.handleWelcome(message.payload as WelcomePayload);
         break;
       case MessageType.SYNC:
-        this.handleSync(message.payload as SyncPayload);
+        this.handleSync(
+          message.payload as SyncPayload,
+          (message as any).__rawBytes ?? 0,
+        );
         break;
       default:
         console.warn("Unknown message type:", message.type);
